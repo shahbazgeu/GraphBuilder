@@ -57,6 +57,8 @@ What’s implemented
 	•	One click → downloads data_jobs.json
   
 Example output:
+
+*/
   [
   {
     "type": "pull",
@@ -66,6 +68,7 @@ Example output:
     "network": "Facebook"
   }
 ]
+/*
 
 This file is:
 
@@ -84,7 +87,8 @@ Now let’s wire this UI to Python.
 🔹 Backend Option A: Flask (Beginner-friendly)
 
 1️⃣ Flask API (server.py)
----------------------------------------------
+
+*/
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 jobs = []
@@ -98,26 +102,28 @@ def save_jobs():
     return {"status": "saved"}
 if __name__ == "__main__":
     app.run(debug=True)
----------------------------------------------
+/*
 
 Run:
----------------------------------------------
+
+*/
 bash
 
 pip install flask
 python server.py
----------------------------------------------
+/*
 
 2️⃣ Connect HTML to Flask
 
 Replace exportJSON() with:
----------------------------------------------
+
+*/
 fetch("http://localhost:5000/jobs", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(jobs)
 });
----------------------------------------------
+/*
 
 Now your UI:
 
