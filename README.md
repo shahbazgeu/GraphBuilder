@@ -6,12 +6,12 @@ Build graphs based on the daily data pull and push timings
 How to Use the UI
 
 	1.	Select Type
-	•	Data Pull
-	•	Data Push
+		•	Data Pull
+		•	Data Push
 	2.	Enter:
-	•	Hour (0–23)
-	•	Start minute (0, 20, 40…)
-	•	Duration (minutes)
+		•	Hour (0–23)
+		•	Start minute (0, 20, 40…)
+		•	Duration (minutes)
 	3.	For Data Pull, enter Network Name
 	4.	Click “Add Job”
 
@@ -58,7 +58,8 @@ What’s implemented
   
 Example output:
 
-`[
+```json
+[
   {
     "type": "pull",
     "hour": 2,
@@ -66,7 +67,8 @@ Example output:
     "duration": 40,
     "network": "Facebook"
   }
-]`
+]
+```
 
 This file is:
 
@@ -86,7 +88,8 @@ Now let’s wire this UI to Python.
 
 1️⃣ Flask API (server.py)
 
-`from flask import Flask, request, jsonify
+```python
+from flask import Flask, request, jsonify
 app = Flask(__name__)
 jobs = []
 @app.route("/jobs", methods=["GET"])
@@ -98,14 +101,17 @@ def save_jobs():
     jobs = request.json
     return {"status": "saved"}
 if __name__ == "__main__":
-    app.run(debug=True)`
+    app.run(debug=True)
+```
 
 Run:
 
-`bash
+```python
+bash
 
 pip install flask
 python server.py`
+```
 
 2️⃣ Connect HTML to Flask
 
