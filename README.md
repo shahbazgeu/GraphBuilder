@@ -58,8 +58,7 @@ What’s implemented
   
 Example output:
 
-*/
-  [
+`[
   {
     "type": "pull",
     "hour": 2,
@@ -67,8 +66,7 @@ Example output:
     "duration": 40,
     "network": "Facebook"
   }
-]
-/*
+]`
 
 This file is:
 
@@ -88,8 +86,7 @@ Now let’s wire this UI to Python.
 
 1️⃣ Flask API (server.py)
 
-*/
-from flask import Flask, request, jsonify
+`from flask import Flask, request, jsonify
 app = Flask(__name__)
 jobs = []
 @app.route("/jobs", methods=["GET"])
@@ -101,17 +98,14 @@ def save_jobs():
     jobs = request.json
     return {"status": "saved"}
 if __name__ == "__main__":
-    app.run(debug=True)
-/*
+    app.run(debug=True)`
 
 Run:
 
-*/
-bash
+`bash
 
 pip install flask
-python server.py
-/*
+python server.py`
 
 2️⃣ Connect HTML to Flask
 
