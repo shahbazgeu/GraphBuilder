@@ -77,12 +77,38 @@
 </div>
 
 <script>
+  const backendUrl = "https://graphbuilder.onrender.com"; // <-- Replace with your Render backend URL
   let jobs = [];
   let editIndex = null;
 
   function convertHour(hour) {
     const tz = document.getElementById('timezone').value;
     return tz === 'IST' ? (hour + 5.5) % 24 : hour;
+  }
+
+  // Load jobs from backend
+  async function loadJobs() {
+    try {
+      const res = await fetch(backendUrl);
+      jobs = await res.json();
+      renderChart();
+    } catch (err) {
+      console.error("Failed to load jobs:", err);
+    }
+  }
+
+  // Save jobs to backend
+  async function saveJobs() {
+    try {
+      await fetch(backendUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(jobs)
+      });
+      console.log("Jobs saved successfully!");
+    } catch (err) {
+      console.error("Failed to save jobs:", err);
+    }
   }
 
   function renderChart() {
@@ -127,6 +153,7 @@
 
     resetForm();
     renderChart();
+    saveJobs(); // save to backend after adding/updating
   }
 
   function editJob(i) {
@@ -142,6 +169,7 @@
   function deleteJob(i) {
     jobs.splice(i, 1);
     renderChart();
+    saveJobs(); // save to backend after deletion
   }
 
   function resetForm() {
@@ -174,7 +202,9 @@
     a.click();
   }
 
-  renderChart();
+  // Load jobs from backend when page loads
+  loadJobs();
+</script>
 </script>
 
 </body>
