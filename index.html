@@ -5,53 +5,18 @@
   <title>Data Pull & Push Timeline</title>
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 20px;
-    }
-    .card {
-      background: white;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #2563eb;
-      color: white;
-      font-weight: bold;
-      border: none;
-      margin-top: 15px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #1d4ed8;
-    }
-    #chart {
-      width: 100%;
-      height: 650px;
-    }
+    body { font-family: Arial, sans-serif; background: #f7f7f7; padding: 20px; }
+    h1 { margin-bottom: 10px; }
+    .container { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+    .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+    label { display: block; margin-top: 10px; font-size: 14px; }
+    input, select, button { width: 100%; padding: 8px; margin-top: 5px; border-radius: 6px; border: 1px solid #ccc; }
+    button { background: #2563eb; color: white; font-weight: bold; border: none; margin-top: 10px; cursor: pointer; }
+    button.danger { background: #dc2626; }
+    button.secondary { background: #6b7280; }
+    #chart { height: 600px; }
+    table { width: 100%; margin-top: 15px; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #ddd; padding: 6px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -60,9 +25,9 @@
 
 <div class="container">
 
-  <!-- Form UI -->
+  <!-- Controls -->
   <div class="card">
-    <h3>Add / Update Job</h3>
+    <h3>Add / Edit Job</h3>
 
     <label>Type</label>
     <select id="type">
@@ -70,19 +35,38 @@
       <option value="push">Data Push</option>
     </select>
 
-    <label>Hour of Day (0–23)</label>
+    <label>Hour (0–23)</label>
     <input type="number" id="hour" min="0" max="23" />
 
     <label>Start Minute</label>
-    <input type="number" id="start" min="0" step="20" />
+    <input type="number" id="start" step="20" min="0" />
 
     <label>Duration (minutes)</label>
     <input type="number" id="duration" min="1" />
 
-    <label>Network Name (Data Pull only)</label>
-    <input type="text" id="network" placeholder="Facebook, Google Ads..." />
+    <label>Network (Pull only)</label>
+    <input type="text" id="network" />
 
-    <button onclick="addJob()">Add Job</button>
+    <button onclick="saveJob()">Save Job</button>
+    <button class="secondary" onclick="resetForm()">Reset</button>
+
+    <hr />
+
+    <label>Timezone</label>
+    <select id="timezone" onchange="renderChart()">
+      <option value="UTC">UTC</option>
+      <option value="IST">IST</option>
+    </select>
+
+    <button onclick="exportJSON()">Export Config (JSON)</button>
+
+    <h4>Jobs</h4>
+    <table id="jobTable">
+      <thead>
+        <tr><th>Type</th><th>Time</th><th>Dur</th><th>Network</th><th>Action</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <!-- Chart -->
@@ -93,70 +77,101 @@
 </div>
 
 <script>
-  let dataPulls = [];
-  let dataPushes = [];
+  let jobs = [];
+  let editIndex = null;
 
-  function renderChart() {
-    const pullTrace = dataPulls.map(d => ({
-      type: 'bar',
-      orientation: 'h',
-      x: [d.duration],
-      y: [d.hour],
-      base: d.start,
-      marker: { color: 'steelblue' },
-      hovertemplate: `Network: ${d.network}<br>Start: ${d.start} min<br>Duration: ${d.duration} min<extra></extra>`
-    }));
-
-    const pushTrace = dataPushes.map(d => ({
-      type: 'bar',
-      orientation: 'h',
-      x: [d.duration],
-      y: [d.hour],
-      base: d.start,
-      marker: { color: 'gold' },
-      hovertemplate: `Data Push<br>Start: ${d.start} min<br>Duration: ${d.duration} min<extra></extra>`
-    }));
-
-    const layout = {
-      barmode: 'overlay',
-      xaxis: {
-        title: 'Time Duration (Minutes)',
-        tick0: 0,
-        dtick: 20,
-        range: [0, 180]
-      },
-      yaxis: {
-        title: 'Hour of Day',
-        tickmode: 'linear',
-        tick0: 0,
-        dtick: 1,
-        range: [-1, 24]
-      },
-      margin: { l: 60, r: 30, t: 30, b: 50 },
-      height: 600
-    };
-
-    Plotly.newPlot('chart', [...pullTrace, ...pushTrace], layout, { responsive: true });
+  function convertHour(hour) {
+    const tz = document.getElementById('timezone').value;
+    return tz === 'IST' ? (hour + 5.5) % 24 : hour;
   }
 
-  function addJob() {
-    const type = document.getElementById('type').value;
-    const hour = Number(document.getElementById('hour').value);
-    const start = Number(document.getElementById('start').value);
-    const duration = Number(document.getElementById('duration').value);
-    const network = document.getElementById('network').value;
+  function renderChart() {
+    const traces = jobs.map(j => ({
+      type: 'bar', orientation: 'h',
+      x: [j.duration],
+      y: [convertHour(j.hour)],
+      base: j.start,
+      marker: { color: j.type === 'pull' ? 'steelblue' : 'gold' },
+      hovertemplate: j.type === 'pull'
+        ? `Network: ${j.network}<br>Start: ${j.start} min<br>Duration: ${j.duration} min<extra></extra>`
+        : `Data Push<br>Start: ${j.start} min<br>Duration: ${j.duration} min<extra></extra>`
+    }));
 
-    if (type === 'pull') {
-      if (!network) {
-        alert('Network name is required for Data Pull');
-        return;
-      }
-      dataPulls.push({ hour, start, duration, network });
+    Plotly.newPlot('chart', traces, {
+      barmode: 'overlay',
+      xaxis: { title: 'Minutes', dtick: 20, range: [0, 180] },
+      yaxis: { title: 'Hour of Day', dtick: 1, range: [-1, 24] },
+      margin: { l: 60, r: 30, t: 30, b: 50 }
+    }, { responsive: true });
+
+    renderTable();
+  }
+
+  function saveJob() {
+    const job = {
+      type: type.value,
+      hour: Number(hour.value),
+      start: Number(start.value),
+      duration: Number(duration.value),
+      network: network.value
+    };
+
+    if (job.type === 'pull' && !job.network) return alert('Network required');
+
+    if (editIndex !== null) {
+      jobs[editIndex] = job;
+      editIndex = null;
     } else {
-      dataPushes.push({ hour, start, duration });
+      jobs.push(job);
     }
 
+    resetForm();
     renderChart();
+  }
+
+  function editJob(i) {
+    const j = jobs[i];
+    type.value = j.type;
+    hour.value = j.hour;
+    start.value = j.start;
+    duration.value = j.duration;
+    network.value = j.network || '';
+    editIndex = i;
+  }
+
+  function deleteJob(i) {
+    jobs.splice(i, 1);
+    renderChart();
+  }
+
+  function resetForm() {
+    document.querySelectorAll('input').forEach(i => i.value = '');
+    editIndex = null;
+  }
+
+  function renderTable() {
+    const tbody = document.querySelector('#jobTable tbody');
+    tbody.innerHTML = '';
+    jobs.forEach((j, i) => {
+      tbody.innerHTML += `<tr>
+        <td>${j.type}</td>
+        <td>${j.hour}:00</td>
+        <td>${j.duration}</td>
+        <td>${j.network || '-'}</td>
+        <td>
+          <button onclick="editJob(${i})">✏️</button>
+          <button class="danger" onclick="deleteJob(${i})">🗑</button>
+        </td>
+      </tr>`;
+    });
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(jobs, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'data_jobs.json';
+    a.click();
   }
 
   renderChart();
