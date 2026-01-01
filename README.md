@@ -117,13 +117,13 @@ python server.py`
 
 Replace exportJSON() with:
 
-*/
+```python
 fetch("http://localhost:5000/jobs", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify(jobs)
 });
-/*
+```
 
 Now your UI:
 
