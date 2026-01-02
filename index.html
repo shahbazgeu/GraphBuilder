@@ -169,9 +169,9 @@ async function importCSV() {
     // Annotation text
     let label = '';
 if (j.type === 'pull') {
-  label = `${j.network}--<b>Starts In</b><b>${j.start}--<b>Duration</b>${j.start + j.duration} min</b>`;
+  label = `<b>${j.network} || Starts In-${j.start} || Duration-${j.start + j.duration} min</b>`;
 } else {
-  label = `<b>ETL PUSH</b><b>Starts In</b><br><b>${j.start}--<b>Duration</b>${j.start + j.duration} min</b>`;
+  label = `<b>ETL PUSH || Starts In-${j.start} || Duration-${j.start + j.duration} min</b>`;
 }
     annotations.push({
       x: j.start + j.duration / 2,
