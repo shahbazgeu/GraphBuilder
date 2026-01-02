@@ -1,7 +1,11 @@
 import csv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import List
+from fastapi import FastAPI, UploadFile, File, HTTPException
 
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -11,12 +15,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-from pydantic import BaseModel
-from typing import List
-from fastapi import FastAPI, UploadFile, File, HTTPException
-
-app = FastAPI()
 jobs = []
 
 @app.get("/jobs")
