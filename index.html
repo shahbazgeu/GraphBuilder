@@ -132,20 +132,20 @@
 
     // Annotation text
     let label = '';
-    if (j.type === 'pull') {
-      label = `Network: ${j.network} | ${j.start}–${j.start + j.duration} min`;
-    } else {
-      label = `Data Push | ${j.start}–${j.start + j.duration} min`;
-    }
+if (j.type === 'pull') {
+  label = `<b>Network:</b> ${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
+} else {
+  label = `<b>Data Push</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+}
 
     annotations.push({
       x: j.start + j.duration / 2,
-      y: yValue - 0.35, // 👈 pushes text below bar
+      y: yValue - 0.5, // 👈 pushes text below bar
       text: label,
       showarrow: false,
       font: {
-        size: 11,
-        color: '#333'
+  size: 15,
+  color: 'red'
       },
       align: 'center'
     });
