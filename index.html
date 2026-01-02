@@ -121,7 +121,6 @@
   function renderChart() {
   const traces = [];
   const annotations = [];
-  const showLabels = document.getElementById('showLabels')?.checked;
 
   jobs.forEach(j => {
     const yValue = convertHour(j.hour);
@@ -137,20 +136,21 @@
     });
 
     // Annotation text
-    
-if (showLabels) {
-      let label = j.type === 'pull'
-        ? `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`
-        : `<b>ETL</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
-  
+    let label = '';
+if (j.type === 'pull') {
+  label = `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
+} else {
+  label = `<b>ETL PUSH</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+}
     annotations.push({
       x: j.start + j.duration / 2,
       y: yValue - 0.35, // 👈 pushes text below bar
       text: label,
       showarrow: false,
       font: {
-  size: 13,
-  color: 'green'
+        size: 13,
+        color: 'green'
+        
       },
       align: 'center'
     });
