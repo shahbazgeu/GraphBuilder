@@ -1,6 +1,17 @@
 import csv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://shahbazgeu.github.io"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 from pydantic import BaseModel
 from typing import List
 from fastapi import FastAPI, UploadFile, File, HTTPException
