@@ -57,7 +57,10 @@
       <option value="UTC">UTC</option>
       <option value="IST">IST</option>
     </select>
-
+    <label style="display:flex; align-items:center; gap:6px; margin:10px 0;">
+  <input type="checkbox" id="showLabels" checked onchange="renderChart()">
+  <strong>Show labels</strong>
+</label>
     <button onclick="exportJSON()">Export Config (JSON)</button>
 
     <h4>Jobs</h4>
@@ -116,6 +119,7 @@
   function renderChart() {
   const traces = [];
   const annotations = [];
+  const showLabels = document.getElementById('showLabels')?.checked;
 
   jobs.forEach(j => {
     const yValue = convertHour(j.hour);
@@ -133,19 +137,23 @@
     // Annotation text
     let label = '';
 if (j.type === 'pull') {
-  label = `<b>Network:</b> ${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
+  label = `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
 } else {
-  label = `<b>Data Push</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+  label = `<b>ETL</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
 }
-
+if (showLabels) {
+      let label = j.type === 'pull'
+        ? `<b>Network:</b> ${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`
+        : `<b>Data Push</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+  
     annotations.push({
       x: j.start + j.duration / 2,
-      y: yValue - 0.5, // 👈 pushes text below bar
+      y: yValue - 0.35, // 👈 pushes text below bar
       text: label,
       showarrow: false,
       font: {
   size: 15,
-  color: 'red'
+  color: 'green'
       },
       align: 'center'
     });
