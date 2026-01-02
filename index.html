@@ -57,10 +57,12 @@
       <option value="UTC">UTC</option>
       <option value="IST">IST</option>
     </select>
+    
     <label style="display:flex; align-items:center; gap:6px; margin:10px 0;">
-  <input type="checkbox" id="showLabels" checked onchange="renderChart()">
-  <strong>Show labels</strong>
-</label>
+    <input type="checkbox" id="showLabels" checked onchange="renderChart()">
+    <strong>Show labels</strong>
+    </label>
+    
     <button onclick="exportJSON()">Export Config (JSON)</button>
 
     <h4>Jobs</h4>
@@ -135,16 +137,11 @@
     });
 
     // Annotation text
-    let label = '';
-if (j.type === 'pull') {
-  label = `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
-} else {
-  label = `<b>ETL</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
-}
+    
 if (showLabels) {
       let label = j.type === 'pull'
-        ? `<b>Network:</b> ${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`
-        : `<b>Data Push</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+        ? `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`
+        : `<b>ETL</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
   
     annotations.push({
       x: j.start + j.duration / 2,
@@ -152,7 +149,7 @@ if (showLabels) {
       text: label,
       showarrow: false,
       font: {
-  size: 15,
+  size: 13,
   color: 'green'
       },
       align: 'center'
