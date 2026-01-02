@@ -110,28 +110,70 @@
       console.error("Failed to save jobs:", err);
     }
   }
-
+  
+//Render Chart on the browser
+  
   function renderChart() {
-    const traces = jobs.map(j => ({
-      type: 'bar', orientation: 'h',
+  const traces = [];
+  const annotations = [];
+
+  jobs.forEach(j => {
+    const yValue = convertHour(j.hour);
+
+    traces.push({
+      type: 'bar',
+      orientation: 'h',
       x: [j.duration],
-      y: [convertHour(j.hour)],
+      y: [yValue],
       base: j.start,
       marker: { color: j.type === 'pull' ? 'steelblue' : 'gold' },
-      hovertemplate: j.type === 'pull'
-        ? `Network: ${j.network}<br>Start: ${j.start} min<br>Duration: ${j.duration} min<extra></extra>`
-        : `Data Push<br>Start: ${j.start} min<br>Duration: ${j.duration} min<extra></extra>`
-    }));
+      hoverinfo: 'skip' // disable hover
+    });
 
-    Plotly.newPlot('chart', traces, {
+    // Annotation text
+    let label = '';
+    if (j.type === 'pull') {
+      label = `Network: ${j.network} | ${j.start}–${j.start + j.duration} min`;
+    } else {
+      label = `Data Push | ${j.start}–${j.start + j.duration} min`;
+    }
+
+    annotations.push({
+      x: j.start + j.duration / 2,
+      y: yValue - 0.35, // 👈 pushes text below bar
+      text: label,
+      showarrow: false,
+      font: {
+        size: 11,
+        color: '#333'
+      },
+      align: 'center'
+    });
+  });
+
+  Plotly.newPlot(
+    'chart',
+    traces,
+    {
       barmode: 'overlay',
-      xaxis: { title: 'Minutes', dtick: 20, range: [0, 180] },
-      yaxis: { title: 'Hour of Day', dtick: 1, range: [-1, 24] },
-      margin: { l: 60, r: 30, t: 30, b: 50 }
-    }, { responsive: true });
+      xaxis: {
+        title: 'Minutes',
+        dtick: 20,
+        range: [0, 180]
+      },
+      yaxis: {
+        title: 'Hour of Day',
+        dtick: 1,
+        range: [-1, 24]
+      },
+      annotations: annotations,
+      margin: { l: 60, r: 30, t: 30, b: 70 }
+    },
+    { responsive: true }
+  );
 
-    renderTable();
-  }
+  renderTable();
+}
 
   function saveJob() {
     const job = {
