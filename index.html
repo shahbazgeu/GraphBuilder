@@ -27,6 +27,13 @@
 
   <!-- Controls -->
   <div class="card">
+
+    <hr>
+    
+    <h3>Import CSV</h3>
+    <input type="file" id="csvFile" accept=".csv">
+    <button onclick="importCSV()">Import CSV</button>
+    
     <h3>Add / Edit Job</h3>
 
     <label>Type</label>
@@ -101,7 +108,31 @@
       console.error("Failed to load jobs:", err);
     }
   }
+  // import data through CSV
+  
+async function importCSV() {
+  const fileInput = document.getElementById("csvFile");
+  if (!fileInput.files.length) {
+    alert("Please select a CSV file");
+    return;
+  }
 
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+
+  const res = await fetch("https://graphbuilder.onrender.com/jobs/import-csv", {
+    method: "POST",
+    body: formData
+  });
+
+  if (!res.ok) {
+    alert("CSV import failed");
+    return;
+  }
+
+  await loadJobs(); // reload jobs & re-render graph
+}
+  
   // Save jobs to backend
   async function saveJobs() {
     try {
@@ -138,9 +169,9 @@
     // Annotation text
     let label = '';
 if (j.type === 'pull') {
-  label = `${j.network}<br><b>${j.start}–${j.start + j.duration} min</b>`;
+  label = `${j.network}--<b>Starts In</b><b>${j.start}--<b>Duration</b>${j.start + j.duration} min</b>`;
 } else {
-  label = `<b>ETL PUSH</b><br><b>${j.start}–${j.start + j.duration} min</b>`;
+  label = `<b>ETL PUSH</b><b>Starts In</b><br><b>${j.start}--<b>Duration</b>${j.start + j.duration} min</b>`;
 }
     annotations.push({
       x: j.start + j.duration / 2,
@@ -149,7 +180,7 @@ if (j.type === 'pull') {
       showarrow: false,
       font: {
         size: 13,
-        color: 'green'
+        color: 'black'
         
       },
       align: 'center'
